@@ -1,0 +1,136 @@
+@charset "utf-8";
+
+/*
+ * Launchpad2 theme
+ * Written by Jeffrey Stanton (Olin 2010) http://nomagicsmoke.com/
+ */
+ 
+/*************** BSD LICENSE *****************
+
+Copyright (c) 2010, Jeffrey Stanton
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice, this
+  list of conditions and the following disclaimer in the documentation and/or
+  other materials provided with the distribution.
+
+* Neither the name of JEFFREY STANTON nor the names of LAUNCHPAD2's contributors
+  may be used to endorse or promote products derived from this software without
+  specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+
+body {
+	margin: 0;
+	padding: 0;
+	}
+.linkblock {
+	display: block;
+	float: left;
+	height: 146px;
+	width: 160px;
+	color: black;
+	border: 2px solid #aaa;
+	margin: 0.4em;
+	text-align: center;
+	font-size: 14px;
+	font-family: arial;
+	font-weight: bold;
+	padding: 6px;
+	background-color: white;
+	background-position: center 40px;
+	background-repeat: no-repeat;
+	/* This is rediculous, hurry up and make it a standard already */
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+a:hover .linkblock,
+a:focus .linkblock {
+	border-color: #ff7900;
+	}
+
+#appList {
+	padding: 0.5em;
+	margin: 0 auto;
+	text-align: center;
+	}
+
+.title {
+	padding: 0;
+	margin: 0;
+	font-size: 1.67em;
+	font-weight: bold;
+	margin-right: 1em;
+	}
+.title sup {
+	font-weight: normal;
+	font-size: 75%;
+	margin-left: 0.25em;
+	}
+h1 {
+	font-family: arial;
+}
+p {
+	font-family: arial;
+	font-size: 10px;
+}
+.searchbox {
+	padding: 1em;
+}
+.searchbox input {
+	padding: 0.4em;
+	margin-right: 1em;
+	}
+
+.searchbox img#logo {
+	margin: 0;
+	padding: 0;
+	border: none;
+	margin-left: -0.5em;
+	margin-top: -0.5em;
+	margin-right: 0.5em;
+	float: left;
+	}
+#singleReminder {
+	font-size: 0.75em;
+	font-style: italic;
+}
+
+
+.BannerAbout {
+	text-align: right;
+	float:right;
+	padding: 0;
+	margin: 0;
+	margin-right: 1em;
+	margin-top: 0.25em;
+	line-height: 1.1em;
+	}
+
+.BannerAbout a {
+	text-decoration: none;
+	border-bottom: 1px dotted;
+}
+
+.linkblock.category {
+	background-image:url('../images/up_arrow.png');
+	}
