@@ -60,7 +60,7 @@ $(document).ready(function() {
 {% if emails %}
 	{% for email in emails %}
 	<div class="emailWrapper">
-	<h4>{{email["subject"]}}</h4>
+	<h4><strong>{{email["subject"]}} </strong> <i>on {{email['date']}}</i></h4>
 	{% for p in email['body'] %}
 		{{p}}
 		</br class='small'>

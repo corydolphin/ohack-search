@@ -30,14 +30,14 @@ else:
     HOST = 'localhost:5000'
 
 
-mail = imaplib.IMAP4_SSL('imap.gmail.com')
-mail.login(os.environ.get('ARCHIVEEMAIL') or "empty", os.environ.get('ARCHIVEPASSWORD') or "secret")
+app.mail = imaplib.IMAP4_SSL('imap.gmail.com')
+app.mail.login(os.environ.get('ARCHIVEEMAIL') or "empty", os.environ.get('ARCHIVEPASSWORD') or "secret")
 
 
 
 
 # Out: list of "folders" aka labels in gmail.
-mail.select("inbox") # connect to inbox.
+app.mail.select("inbox") # connect to inbox.
 
 
 @app.route('/')
@@ -52,7 +52,7 @@ def search():
         emailIds = getSearchGenerator(query)
         logging.debug('Querying %s emails took %0.3f ms' % (len(emailIds), (time.time()-t1)*1000.0))
 
-    return render_template('search.html',emails=[getEmail(uid) for uid in emailIds[-10:]], shouldServe=onCampus)
+    return render_template('search.html',emails=getEmailBatch(emailIds[:50]), shouldServe=onCampus)
 
 
 @app.route('/search')
@@ -60,7 +60,7 @@ def apiQuery():
     query = request.args.get('query', False,type=str)
     if query:
         emailIds = getSearchGenerator(query, label="")
-        return jsonify(emails=[getEmail(uid) for uid in emailIds[-10:]])
+        return jsonify(emails=[getEmail(uid) for uid in emailIds[:10]])
     else:
         return jsonify({"error":"No query parameter set"}),400 #bad request
 
@@ -74,12 +74,36 @@ def isAtOlin(req):
     return  'olin' in host
 
 def getEmail(uid):
-    typ, data = mail.fetch(uid, '(RFC822)')
+    typ, data = app.mail.fetch(uid, '(RFC822)')
     msg = email.message_from_string(data[0][1]) 
     return {"body" : re.sub("^(\s*\r\n){2,}",'\r\n',getBody(msg)).split('\r\n'),
             "subject" : msg["subject"],
             "date" : msg.get('date')
             }
+
+
+def getSlices(data):
+    for i in range(len(data)/2):
+        yield data[i*2:(i*2) + 2]
+
+def getEmailBatch(uids):
+    res = []
+    queryString = ','.join([numail for numail in uids])
+    typ, data = app.mail.fetch(queryString, '(RFC822)')
+    for d in getSlices(data):
+        msg = email.message_from_string(d[0][1]) 
+        res.append({"body" : re.sub("^(\s*\r\n){2,}",'\r\n',getBody(msg)).split('\r\n'),
+                "subject" : msg["subject"],
+                "date" : msg.get('date')
+                })      
+    return reversed(res)
+def getSlices(data):
+    for i in range(len(data)/2):
+        yield data[i*2:(i*2) + 2]
+
+def getSlices(data):
+    for i in range(len(data)/2):
+        yield data[i*2:(i*2) + 2]
 
 def getBody(msg):
     res = ''
@@ -90,7 +114,7 @@ def getBody(msg):
             else:
                 charset = part.get_content_charset()
             try:
-                res += unicode(part.get_payload(decode=True),str(charset),"ignore")
+                res += unicode(part.get_payload(decode=True) or '',str(charset),"ignore")
             except Exception as e:
                 logging.error("Decoding error: %s original={%s}"%(e, part.get_payload(decode=True)))
                 continue
@@ -99,19 +123,13 @@ def getBody(msg):
 @cache.memoize()
 def getSearchGenerator(query):
     try:
-        res = []
-        typ, data = mail.search('utf8', '(X-GM-RAW "%s")'% query)
-        for numail in data[0].split():
-            #typ, data = mail.fetch(numail, '(RFC822)')
-            #logging.debug(data[0][1])
-            #res.append('mailessage %s' % ( data[0][1]))
-            res.append(numail)
-        return res
+        typ, data = app.mail.search('utf8', '(X-GM-RAW "%s")'% query)
+        return [r for r in reversed(data[0].split())] #Google gives them in reverse date order...
     except imaplib.IMAP4.abort as e:
         logging.error(e)
-        #mail = imaplib.IMAP4_SSL('imap.gmail.com')
-        mail = imaplib.IMAP4_SSL('imap.gmail.com')
-        mail.login(os.environ.get('ARCHIVEEMAIL') or "empty", os.environ.get('ARCHIVEPASSWORD') or "secret")
+        app.mail = imaplib.IMAP4_SSL('imap.gmail.com')
+        app.mail.login(os.environ.get('ARCHIVEEMAIL') or "empty", os.environ.get('ARCHIVEPASSWORD') or "secret")
+        app.mail.select("inbox") # connect to inbox.
         return getSearchGenerator(query)
 
 if __name__ == '__main__':
