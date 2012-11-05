@@ -5,6 +5,7 @@ from flask import Flask, session, request, redirect, url_for, render_template, j
 import socket
 import chardet
 from flask.ext.cache import Cache
+import time
 
 class Mailboxes:
     HELPME="Helpme"
@@ -37,11 +38,26 @@ app.mail.login(os.environ.get('ARCHIVEEMAIL') or "empty", os.environ.get('ARCHIV
 app.mail.select(Mailboxes.HELPME) # connect to inbox.
 
 
+
+def print_timing(func):
+    def wrapper(*arg):
+        t1 = time.time()
+        res = func(*arg)
+        t2 = time.time()
+        logging.info('%s took %0.3f ms' % (func.func_name, (t2-t1)*1000.0))
+        return res
+    return wrapper
+
+
+
 ## Views
 @app.route('/')
 def search():
     query = request.args.get('query', False,type=str)
-    onCampus = isAtOlin(request.remote_addr)
+    if request.remote_addr:
+        onCampus = isAtOlin(request.remote_addr)
+    else:
+        onCampus = True
     logging.debug("Is At Olin: %s" % onCampus)
     logging.debug("Query:%s" % query)
     logging.debug("app.debug=%s"%app.debug)
@@ -78,7 +94,7 @@ def internal_server_error(e):
     return render_template('error.html'), 500
 
 
-
+@print_timing
 @cache.memoize()
 def isAtOlin(remoteAddress):
     host,_,_ = socket.gethostbyaddr(remoteAddress)
@@ -166,13 +182,14 @@ def getBody(msg, htmlIfEmpty=True, magick=False):
         return getBody(msg,True,True)
     return res.replace("-------------- next part --------------\r\nSkipped content of type text/html","") #not sure why mailman inserts this everywhere
 
+
 @cache.memoize() #memoize this operation to allow pagination later
 def searchMail(query):
     try:
         query = ''.join(ch for ch in query if ch.isalnum()) #sanitize
         typ, data = app.mail.search('utf8', '(X-GM-RAW "%s")'% query)
         return [r for r in reversed(data[0].split())] #Google gives them in reverse date order...
-    except imaplib.IMAP4.abort as e:
+    except (imaplib.IMAP4.abort, Exception) as e:
         logging.error(e)
         app.mail = imaplib.IMAP4_SSL('imap.gmail.com')
         app.mail.login(os.environ.get('ARCHIVEEMAIL') or 'empty', os.environ.get('ARCHIVEPASSWORD') or 'secret')
