@@ -120,19 +120,26 @@ def getEmailBatch(emailIds):
     if not emailIds or len(emailIds) <= 0:
         return []
 
-    t1 = time.time()
-    res = []
-    queryString = ','.join([numail for numail in emailIds])
-    typ, data = app.mail.fetch(queryString, '(RFC822)')
-    for d in getSlices(data): #data comes as two by two tuples, [0][1] contains raw data
-        msg = email.message_from_string(d[0][1]) 
-        res.append(
-            {"body" : getBody(msg).split('\r\n'),
-             "subject" : msg["subject"],
-             "date" : msg.get('date')
-                })
-    logging.debug('GetContent on %s emails took %0.3f ms' % (len(emailIds), (time.time()-t1)*1000.0))
-    return reversed(res) #reverse them, so they are date sorted
+    try:
+        t1 = time.time()
+        res = []
+        queryString = ','.join([numail for numail in emailIds])
+        typ, data = app.mail.fetch(queryString, '(RFC822)')
+        for d in getSlices(data): #data comes as two by two tuples, [0][1] contains raw data
+            msg = email.message_from_string(d[0][1]) 
+            res.append(
+                {"body" : getBody(msg).split('\r\n'),
+                 "subject" : msg["subject"],
+                 "date" : msg.get('date')
+                    })
+        logging.debug('GetContent on %s emails took %0.3f ms' % (len(emailIds), (time.time()-t1)*1000.0))
+        return reversed(res) #reverse them, so they are date sorted
+    except imaplib.IMAP4.abort as e:
+        logging.error(e)
+        app.mail = imaplib.IMAP4_SSL('imap.gmail.com')
+        app.mail.login(os.environ.get('ARCHIVEEMAIL') or 'empty', os.environ.get('ARCHIVEPASSWORD') or 'secret')
+        app.mail.select(Mailboxes.HELPME)
+        return getEmailBatch(uids)
 
 def getBody(msg, htmlIfEmpty=True, magick=False):
     '''
