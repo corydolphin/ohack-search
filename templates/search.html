@@ -50,12 +50,12 @@ $(document).ready(function() {
     </span>
 	<input type="search" class="span3" placeholder="Where is a fax machine..." name="query" id="filter-input">
 </div>
-	<span id="quick-link">Search {{shouldServe}} through Helpme Archives!<span id="quick-link-name"></span></span>
+	<span id="quick-link">Search through Helpme Archives!<span id="quick-link-name"></span></span>
 </form> 
 
 <div class="container-fluid">
  {% if not shouldServe %}
-<h2 style="color:red;"> I don't think you are on campus... Email Cory if I am wrong </h2>
+	<h2 style="color:red;"> I don't think you are on campus... Email Cory if I am wrong. Also, tell him to add authentication for off campus Oliners! </h2>
  {% endif %}
 {% if emails %}
 	{% for email in emails %}
