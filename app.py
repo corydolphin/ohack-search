@@ -7,11 +7,9 @@ import chardet
 from flask.ext.cache import Cache
 
 
-
 app = Flask(__name__, static_url_path='')
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 cache.init_app(app, config={'CACHE_TYPE': 'simple'})
-
 Flask.secret_key = os.environ.get('FLASK_SESSION_KEY', os.environ.get('SECRET_KEY', 'test-key-please-ignore'))
 
 logging.basicConfig( 
@@ -32,14 +30,10 @@ else:
 
 app.mail = imaplib.IMAP4_SSL('imap.gmail.com')
 app.mail.login(os.environ.get('ARCHIVEEMAIL') or "empty", os.environ.get('ARCHIVEPASSWORD') or "secret")
-
-
-
-
-# Out: list of "folders" aka labels in gmail.
 app.mail.select("inbox") # connect to inbox.
 
 
+## Views
 @app.route('/')
 def search():
     query = request.args.get('query', False,type=str)
@@ -69,6 +63,8 @@ def apiQuery():
 def blitzAuthorize():
     return '42'
 
+
+## Helpers
 def isAtOlin(req):
     host,_,_ = socket.gethostbyaddr(request.remote_addr)
     return  'olin' in host
@@ -97,13 +93,6 @@ def getEmailBatch(uids):
                 "date" : msg.get('date')
                 })      
     return reversed(res)
-def getSlices(data):
-    for i in range(len(data)/2):
-        yield data[i*2:(i*2) + 2]
-
-def getSlices(data):
-    for i in range(len(data)/2):
-        yield data[i*2:(i*2) + 2]
 
 def getBody(msg):
     res = ''
