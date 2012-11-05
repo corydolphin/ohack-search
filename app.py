@@ -110,6 +110,7 @@ def getSearchGenerator(query):
     except imaplib.IMAP4.abort as e:
         logging.error(e)
         #mail = imaplib.IMAP4_SSL('imap.gmail.com')
+        mail = imaplib.IMAP4_SSL('imap.gmail.com')
         mail.login(os.environ.get('ARCHIVEEMAIL') or "empty", os.environ.get('ARCHIVEPASSWORD') or "secret")
         return getSearchGenerator(query)
 
