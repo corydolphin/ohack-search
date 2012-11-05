@@ -23,24 +23,6 @@
 
 </style>
 
-<script>
-$.expander.defaults.slicePoint = 120;
-
-$(document).ready(function() {
-  // simple example, using all default options unless overridden globally
-
-  // *** OR ***
-
-  // override default options (also overrides global overrides)
-  $('div.emailWrapper').expander({
-    slicePoint:       200,  // default is 100
-    expandPrefix:     ' ', // default is '... '
-    expandText:       '[...]', // default is 'read more'
-    userCollapseText: '[^]'  // default is 'read less'
-  });
-
-});
-</script>
 
 <form id="header" class="form-search row">
 	<h1>Search Helpme Archives</h1>
@@ -60,7 +42,7 @@ $(document).ready(function() {
  <p>
  	Feel free to send an email to ohack/Cory/whoever else is running it at somepoint, and encourage them to fix it.
  </p> 
- <img src="/images/fail.jpg" alt="Whoops" style="padding:8px;background:white;">
+ <img src={{url_for("static",filename="images/fail.jpg")}} alt="Whoops" style="padding:8px;background:white;">
 </div> 
 
 <p id="footer">
