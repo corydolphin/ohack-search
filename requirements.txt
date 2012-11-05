@@ -1,6 +1,8 @@
-newrelic
-Flask==0.9
-requests==0.10.8
-gunicorn==0.13.4
-chardet==2.1.1
+Flask
 Flask-cache
+requests
+chardet
+
+gunicorn
+gevent
+newrelic
