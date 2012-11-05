@@ -153,6 +153,7 @@ def getBody(msg, htmlIfEmpty=True, magick=False):
 @cache.memoize() #memoize this operation to allow pagination later
 def searchMail(query):
     try:
+        query = ''.join(ch for ch in query if ch.isalnum()) #sanitize
         typ, data = app.mail.search('utf8', '(X-GM-RAW "%s")'% query)
         return [r for r in reversed(data[0].split())] #Google gives them in reverse date order...
     except imaplib.IMAP4.abort as e:
