@@ -12,10 +12,13 @@ class Mailboxes:
     CARPEDIEM="Carpediem"
 
 
+
 app = Flask(__name__, static_url_path='')
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 cache.init_app(app, config={'CACHE_TYPE': 'simple'})
 Flask.secret_key = os.environ.get('FLASK_SESSION_KEY', os.environ.get('SECRET_KEY', 'test-key-please-ignore'))
+
+memory_hog = a = [_ for _ in range(1024*1024*20)] #should take up about 80MB of RAM. 
 
 logging.basicConfig( 
     stream=sys.stdout, 
