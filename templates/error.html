@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block content %}
-<script src="/scripts/jquery.expander.min.js"></script>
 <style>
 #header { margin-bottom: 20px; }
 .container-fluid h2 { clear: both; margin: 0; padding: 15px 0 5px; font-size: 1.3em; line-height: inherit; }
@@ -42,7 +41,7 @@
  <p>
  	Feel free to send an email to ohack/Cory/whoever else is running it at somepoint, and encourage them to fix it.
  </p> 
- <img src={{url_for("static",filename="images/fail.jpg")}} alt="Whoops" style="padding:8px;background:white;">
+ <img src="/images/fail.jpg" alt="Whoops" style="padding:8px;background:white;">
 </div> 
 
 <p id="footer">

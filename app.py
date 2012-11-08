@@ -98,7 +98,10 @@ def internal_server_error(e):
 @print_timing
 @cache.memoize()
 def isAtOlin(remoteAddress):
-    host,_,_ = socket.gethostbyaddr(remoteAddress)
+    try: #occasionally hostname lookup fails
+        host,_,_ = socket.gethostbyaddr(remoteAddress)
+    except Exception as e:
+        return False
     return  'olin' in host
 
 def getEmail(uid):
@@ -187,7 +190,7 @@ def getBody(msg, htmlIfEmpty=True, magick=False):
 @cache.memoize() #memoize this operation to allow pagination later
 def searchMail(query):
     try:
-        query = ''.join(ch for ch in query if ch.isalnum()) #sanitize
+        query = query.translate(None,"\"'\\") #quote characters are the only literal which will break search
         typ, data = app.mail.search('utf8', '(X-GM-RAW "%s")'% query)
         return [r for r in reversed(data[0].split())] #Google gives them in reverse date order...
     except (imaplib.IMAP4.abort, Exception) as e:
@@ -195,7 +198,7 @@ def searchMail(query):
         app.mail = imaplib.IMAP4_SSL('imap.gmail.com')
         app.mail.login(os.environ.get('ARCHIVEEMAIL') or 'empty', os.environ.get('ARCHIVEPASSWORD') or 'secret')
         app.mail.select(Mailboxes.HELPME)
-        return getSearchGenerator(query)
+        return searchMail(query)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
