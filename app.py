@@ -75,8 +75,8 @@ def search():
 def apiQuery():
     query = request.args.get('query', False,type=str)
     if query:
-        emailIds = searchMail(query, label="")
-        return jsonify(emails=[getEmail(uid) for uid in emailIds[:10]])
+        emailIds = searchMail(query)
+        return jsonify(emails=getEmailBatch(emailIds[:50]))
     else:
         return jsonify({"error":"No query parameter set"}),400 #bad request
 
@@ -142,18 +142,27 @@ def getEmailBatch(emailIds):
 
     try:
         t1 = time.time()
-        res = []
+        res = {}
         queryString = ','.join([numail for numail in emailIds])
-        typ, data = app.mail.fetch(queryString, '(RFC822)')
+        typ, data = app.mail.fetch(queryString, '(RFC822 X-GM-THRID)')
         for d in getSlices(data): #data comes as two by two tuples, [0][1] contains raw data
             msg = email.message_from_string(d[0][1]) 
-            res.append(
+            m = re.match(r'.*X-GM-THRID (\d+) .*',d[0][0])
+            threadId = -1
+            if m:
+                threadId = m.group(1)
+
+            if not threadId in res:
+                res[threadId] = []
+
+            res[threadId].append(
                 {"body" : getBody(msg).split('\r\n'),
                  "subject" : msg["subject"],
-                 "date" : msg.get('date')
-                    })
+                 "date" : msg.get('date'),
+                 "threadId" : threadId
+                })
         logging.debug('GetContent on %s emails took %0.3f ms' % (len(emailIds), (time.time()-t1)*1000.0))
-        return reversed(res) #reverse them, so they are date sorted
+        return res #reverse them, so they are date sorted
     except imaplib.IMAP4.abort as e:
         logging.error(e)
         app.mail = imaplib.IMAP4_SSL('imap.gmail.com')
@@ -171,7 +180,7 @@ def getBody(msg, htmlIfEmpty=True, magick=False):
     '''
     res = ''
     for part in msg.walk():
-        if part.get_content_type() == "text/plain" or (htmlIfEmpty and part.get_content_type() == "text/html"): #we don't want the HTML, or attachments
+        if part.get_content_type() == "text/plain" or (htmlIfEmpty and part.get_content_type() == "multipart/mixed"): #we don't want the HTML, or attachments
             if part.get_content_charset() is None:
                 charset = chardet.detect(str(part))['encoding']
             else:
@@ -190,7 +199,7 @@ def getBody(msg, htmlIfEmpty=True, magick=False):
 @cache.memoize() #memoize this operation to allow pagination later
 def searchMail(query):
     try:
-        query = query.translate(None,"\"'\\") #quote characters are the only literal which will break search
+        query = query.translate(None,"\"'") #quote characters are the only literal which will break search
         typ, data = app.mail.search('utf8', '(X-GM-RAW "%s")'% query)
         return [r for r in reversed(data[0].split())] #Google gives them in reverse date order...
     except (imaplib.IMAP4.abort, Exception) as e:

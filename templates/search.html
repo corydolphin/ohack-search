@@ -20,6 +20,9 @@
 	padding-top:5px;
 	margin-bottom:5px;
 }
+.subMessage{
+	margin-left:20px;
+}
 
 </style>
 
@@ -58,16 +61,19 @@ $(document).ready(function() {
 	<h2 style="color:red;"> I don't think you are on campus... Email Cory if I am wrong. Also, tell him to add authentication for off campus Oliners! </h2>
  {% endif %}
 {% if emails %}
-	{% for email in emails %}
-	<div class="emailWrapper">
-	<h4><strong>{{email["subject"]}} </strong> <i>on {{email['date']}}</i></h4>
-	{% for p in email['body'] %}
-		{{p}}
-		</br class='small'>
-	{% endfor %}
-	</div>
-	{% endfor %}
+	{% for thread in emails.itervalues() %}
 
+		{% for email in thread %}
+		
+		<div class="emailWrapper {% if loop.index > 1 %} subMessage {% endif %}">
+			<h4><strong>{{email["subject"]}} </strong> <i>on {{email['date']}}</i></h4>
+			{% for p in email['body'] %}
+			{{p}} </br class='small'>
+			{% endfor %}
+		</div>
+
+		{% endfor %}
+	{% endfor %}
 {% endif %}
  
 </div> 
